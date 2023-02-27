@@ -18,7 +18,7 @@ struct Payload {
 };
 
 typedef std::function<std::string(std::shared_ptr<Payload>)> ExecuteJob;
-using timepoint = std::chrono::time_point<std::chrono::steady_clock>;
+using timepoint = std::chrono::time_point<std::chrono::system_clock>;
 
 struct Job {
     timepoint tp;
@@ -33,7 +33,7 @@ public:
     JobScheduler();
     ~JobScheduler();
 
-    void add(Job k, double delayToRun);
+    void add(Job k);
 
 private:
 
@@ -53,6 +53,6 @@ private:
 
     bool m_shutdown;
 
-    void worker_thread();
-    void timer_thread();
+    void handleJobThread();
+    void TimerThread();
 };

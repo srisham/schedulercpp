@@ -1,5 +1,8 @@
 #include <chrono>
 #include <iostream>
+#include <ctime>
+#include <time.h>
+#include <iomanip>
 
 #include "jobScheduler.h"
 
@@ -7,15 +10,13 @@
 JobScheduler::JobScheduler() :
     m_shutdown(false) {
 
-    m_jobTd = std::thread(&JobScheduler::worker_thread, this);
-    n_timerTd = std::thread(&JobScheduler::timer_thread, this);
+    m_jobTd = std::thread(&JobScheduler::handleJobThread, this);
+    n_timerTd = std::thread(&JobScheduler::TimerThread, this);
 }
 
 JobScheduler::~JobScheduler() {
 
-
     m_shutdown = true;
-
     {
         std::lock_guard<std::mutex> lck{m_timerMtx};
         m_timerCV.notify_one();
@@ -28,18 +29,16 @@ JobScheduler::~JobScheduler() {
     }
     m_jobTd.join();
 
-    // for (auto &t : ThreadPool)
-    //     t.join();
 }
 
-void JobScheduler::add(Job k, double delayToRun)
+void JobScheduler::add(Job k)
 {
+    
+    // auto now = std::chrono::system_clock::now();
+    // long delay_ms = delayToRun * 1000;
 
-    auto now = std::chrono::steady_clock::now();
-    long delay_ms = delayToRun * 1000;
-
-    std::chrono::milliseconds duration (delay_ms);
-    k.tp = now + duration;
+    // std::chrono::milliseconds duration (delay_ms);
+    // k.tp = now + duration;
 
     // if (now >= tp)
     // {
@@ -53,26 +52,23 @@ void JobScheduler::add(Job k, double delayToRun)
 
     // } else
     {
-        // std::cout << "m_priorityQ pushed " << std::endl;
         std::lock_guard<std::mutex> lck{m_timerMtx};
 
         m_priorityQ.push({k});
-
         m_timerCV.notify_one();
     }
 }
 
-void JobScheduler::worker_thread()
+void JobScheduler::handleJobThread()
 {
-    std::cout << "worker_thread + " << std::endl;
-    for (;;)
+    while (!m_shutdown)
     {
         std::unique_lock<std::mutex> lck{m_jobMtx};
 
         m_jobCV.wait(lck, [this] { return m_readyToRunList.size() != 0 ||
             m_shutdown; } );
 
-        // std::cout << "worker_thread m_readyToRunList.size " << m_readyToRunList.size() << std::endl;
+        // std::cout << "handleJobThread m_readyToRunList.size " << m_readyToRunList.size() << std::endl;
         if (m_shutdown)
             break;
 
@@ -80,53 +76,45 @@ void JobScheduler::worker_thread()
         m_readyToRunList.pop_back();
 
         lck.unlock();
-
         Job.funcPtr(Job.st);
-        // p->run();
-
-        // delete p; // delete Task
     }
-    std::cout << "worker_thread - " << std::endl;
 }
 
-void JobScheduler::timer_thread()
+void JobScheduler::TimerThread()
 {
-    std::cout << "timer_thread + " << std::endl;
-    for (;;)
+    while (!m_shutdown)
     {
         std::unique_lock<std::mutex> lck{m_timerMtx};
 
-        if (m_shutdown)
+        if (m_shutdown) {
             break;
+        }
 
         auto duration = std::chrono::nanoseconds(1000000000);
+        // std::cout << "TimerThread m_priorityQ size " << m_priorityQ.size() << std::endl;
+        if (m_priorityQ.size() != 0) {
 
-        // std::cout << "timer_thread m_priorityQ size " << m_priorityQ.size() << std::endl;
-        if (m_priorityQ.size() != 0)
-        {
-            auto now = std::chrono::steady_clock::now();
+            auto now = std::chrono::system_clock::now();
 
             auto head = m_priorityQ.top();
-            // auto devState = head.st;
-
             duration = head.tp - now;
-            if (now >= head.tp)
-            {
-                /*
-                 * A Task is due, pass to worker threads
-                 */
+            time_t tm = std::chrono::system_clock::to_time_t(head.tp);
+
+            if (now >= head.tp) {
+
                 std::unique_lock<std::mutex> ulck{m_jobMtx};
+
                 m_readyToRunList.push_back(head);
-                // std::cout << "timer_thread m_readyToRunList element pushed" << std::endl;
+                std::cout << "Job Scheduled @ " << std::put_time(std::localtime(&tm), "%F %T") << std::endl;
+
                 m_jobCV.notify_one();
                 ulck.unlock();
 
                 m_priorityQ.pop();
             }
         }
-
+        std::cout << "timer thread loop " << std::endl;
         m_timerCV.wait_for(lck, duration);
     }
-    std::cout << "timer_thread - " << std::endl;
 }
 
