@@ -11,6 +11,8 @@
 #include <functional>
 
 
+void printCurrentTime();
+
 struct Payload {
     std::string deviceType;
     std::string name;
@@ -18,7 +20,7 @@ struct Payload {
 };
 
 typedef std::function<std::string(std::shared_ptr<Payload>)> ExecuteJob;
-using timepoint = std::chrono::time_point<std::chrono::steady_clock>;
+using timepoint = std::chrono::time_point<std::chrono::system_clock>;
 
 struct Job {
     timepoint tp;
@@ -33,7 +35,7 @@ public:
     JobScheduler();
     ~JobScheduler();
 
-    void add(Job k, double delayToRun);
+    void add(Job k);
 
 private:
 
@@ -47,12 +49,12 @@ private:
     std::vector<Job> m_readyToRunList;
     std::priority_queue<Job, std::vector<Job>, TScomp> m_priorityQ;
 
-    std::thread n_timerTd, m_jobTd;
+    std::thread m_timerTd, m_jobTd;
     std::mutex m_timerMtx, m_jobMtx;
     std::condition_variable m_timerCV, m_jobCV;
 
     bool m_shutdown;
 
-    void worker_thread();
-    void timer_thread();
+    void executeJobThread();
+    void scheduleJobThread();
 };
