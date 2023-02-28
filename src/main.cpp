@@ -41,16 +41,18 @@ time_t getFutureTime(uint32_t hour, uint32_t minutes) {
     if (futureTm < nowTm) {
         std::cout << "Time is expired " << std::endl;
     }
+    /*
     else {
         std::cout << "Future time is " << std::put_time(std::localtime(&futureTm), "%F %T")  << std::endl;
     }
+    */
 
     return futureTm;
 }
 
 std::string handleRequest(std::shared_ptr<Payload> arg) {
 
-    std::cout << "Job executed @ ";
+    std::cout << "handleRequest @ ";
     printCurrentTime();
     std:: cout << "Received Arguments are " 
         << arg->name << " "
@@ -71,23 +73,22 @@ int main() {
 
     Job k1, k2, k3;
     k1.st = p1;
-    k1.tp = std::chrono::system_clock::from_time_t(getFutureTime(15, 30));
+    k1.tp = std::chrono::system_clock::from_time_t(getFutureTime(04, 11));
     k1.funcPtr = handleRequest;
 
     k2.st = p2;
-    k2.tp = std::chrono::system_clock::from_time_t(getFutureTime(15, 31));
+    k2.tp = std::chrono::system_clock::from_time_t(getFutureTime(04, 10));
     k2.funcPtr = handleRequest;
-
-    k3.st = p3;
-    k3.tp = std::chrono::system_clock::from_time_t(getFutureTime(15, 29));
-    k3.funcPtr = handleRequest;
 
     JobScheduler sched;
     sched.add(k1);
     sched.add(k2); 
 
     std::this_thread::sleep_for(std::chrono::minutes(1));
-    sched.add(k3); // least due time is executed first
+    k3.st = p3;
+    k3.tp = std::chrono::system_clock::from_time_t(getFutureTime(04, 11));
+    k3.funcPtr = handleRequest;
+    sched.add(k3);
 
     std::this_thread::sleep_for(std::chrono::minutes(4));
 }

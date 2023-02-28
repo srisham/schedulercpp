@@ -11,6 +11,8 @@
 #include <functional>
 
 
+void printCurrentTime();
+
 struct Payload {
     std::string deviceType;
     std::string name;
@@ -47,12 +49,12 @@ private:
     std::vector<Job> m_readyToRunList;
     std::priority_queue<Job, std::vector<Job>, TScomp> m_priorityQ;
 
-    std::thread n_timerTd, m_jobTd;
+    std::thread m_timerTd, m_jobTd;
     std::mutex m_timerMtx, m_jobMtx;
     std::condition_variable m_timerCV, m_jobCV;
 
     bool m_shutdown;
 
-    void handleJobThread();
-    void TimerThread();
+    void executeJobThread();
+    void scheduleJobThread();
 };
