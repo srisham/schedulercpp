@@ -32,7 +32,7 @@ Use cmake tools to build the schedulercpp. Run the following commands to build t
     cmake ..
 
 ### Cross Compilation
-In order to cross compile this module, use the cmake-tookchains file available in the [toolchain](https://github.com/srisham/schedulercpp/tree/master/cmake/toolchain) directory. Update the arm_toolchain.cmake file with your toolchain details. Refer the sample version in this [example](https://github.com/srisham/schedulercpp/tree/master/cmake/toolchain/example).
+In order to cross compile this module, use the cmake-tookchains file available in the [toolchain](cmake/toolchain) directory. Update the arm_toolchain.cmake file with your toolchain details. Refer the sample version in this [example](cmake/toolchain/example).
 To cross-compile, run the following commands:
 
     mkdir build_arm
