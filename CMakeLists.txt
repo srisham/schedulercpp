@@ -7,19 +7,13 @@ SET(CMAKE_CXX_FLAGS  "${GCC_COVERAGE_COMPILE_FLAGS}")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 
 add_executable(${PROJECT_NAME} 
-    ${CMAKE_SOURCE_DIR}/src/jobScheduler.cpp
+    ${CMAKE_SOURCE_DIR}/src/jobscheduler.cpp
     ${CMAKE_SOURCE_DIR}/src/main.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/include
 )
-
-# # Jansson JSON library
-# find_package(Jansson REQUIRED) 
-# target_link_libraries(${PROJECT_NAME}
-#     jansson
-# )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

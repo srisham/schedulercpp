@@ -4,7 +4,7 @@
 #include <time.h>
 #include <iomanip>
 
-#include "jobScheduler.h"
+#include "jobscheduler.h"
 
 
 JobScheduler::JobScheduler() :
@@ -58,7 +58,7 @@ void JobScheduler::executeJobThread()
 
         lck.unlock();
         std::cout << "Job executed @ "; printCurrentTime();
-        Job.funcPtr(Job.st);
+        Job.funcPtr(Job.payload);
     }
 }
 

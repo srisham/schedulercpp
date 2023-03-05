@@ -5,10 +5,16 @@
 #include <time.h>
 #include <chrono>
 
-#include "jobScheduler.h"
+#include "jobscheduler.h"
 
 using namespace std;
 using namespace std::chrono;
+
+struct Payload {
+    std::string deviceType;
+    std::string name;
+    int sceneId;
+};
 
 void printCurrentTime() {
 
@@ -50,45 +56,52 @@ time_t getFutureTime(uint32_t hour, uint32_t minutes) {
     return futureTm;
 }
 
-std::string handleRequest(std::shared_ptr<Payload> arg) {
+void handleRequest(std::any arg) {
+
+    Payload payload;
+    try {
+        payload = std::any_cast<Payload>(arg);
+    }
+    catch(const std::bad_any_cast& e) {
+        std::cout << "Invalid arguments type: " << e.what() << std::endl;
+        return;
+    }
 
     std::cout << "handleRequest @ ";
     printCurrentTime();
     std:: cout << "Received Arguments are " 
-        << arg->name << " "
-        << arg->deviceType << " "
-        << arg->sceneId << " "
+        << payload.name << " "
+        << payload.deviceType << " "
+        << payload.sceneId << " "
         << std::endl;
-
-    return "Success";
 }
 
 int main() {    
 
     std::cout << "Job Scheduler " << std::endl;
 
-    auto p1 = std::make_shared<Payload>(Payload{"Wiz", "light", 12});
-    auto p2 = std::make_shared<Payload>(Payload{"Wemo", "plug", 14});
-    auto p3 = std::make_shared<Payload>(Payload{"Wyze", "light", 32});
+    Payload p1 = {"Wiz", "light", 12};
+    Payload p2 = {"Wemo", "plug", 14};
+    Payload p3 = {"Wyze", "light", 32};
 
-    Job k1, k2, k3;
-    k1.st = p1;
-    k1.tp = std::chrono::system_clock::from_time_t(getFutureTime(04, 11));
-    k1.funcPtr = handleRequest;
+    Job j1, j2, j3;
+    j1.payload = p1;
+    j1.tp = std::chrono::system_clock::from_time_t(getFutureTime(10, 8));
+    j1.funcPtr = handleRequest;
 
-    k2.st = p2;
-    k2.tp = std::chrono::system_clock::from_time_t(getFutureTime(04, 10));
-    k2.funcPtr = handleRequest;
+    j2.payload = p2;
+    j2.tp = std::chrono::system_clock::from_time_t(getFutureTime(10, 9));
+    j2.funcPtr = handleRequest;
 
     JobScheduler sched;
-    sched.add(k1);
-    sched.add(k2); 
+    sched.add(j1);
+    sched.add(j2); 
 
     std::this_thread::sleep_for(std::chrono::minutes(1));
-    k3.st = p3;
-    k3.tp = std::chrono::system_clock::from_time_t(getFutureTime(04, 11));
-    k3.funcPtr = handleRequest;
-    sched.add(k3);
+    j3.payload = p3;
+    j3.tp = std::chrono::system_clock::from_time_t(getFutureTime(10, 8));
+    j3.funcPtr = handleRequest;
+    sched.add(j3);
 
     std::this_thread::sleep_for(std::chrono::minutes(4));
 }
