@@ -67,10 +67,15 @@ int main() {
 
     std::cout << "Job Scheduler example " << std::endl;
 
+    // Actual payloads to be sent to Job Queue.
     Payload p1 = {"Wiz", "light", 12};
     Payload p2 = {"Wemo", "plug", 14};
     Payload p3 = {"Wyze", "light", 32};
 
+    /*
+    Create Job that includes payload, custom job function and scheduled time. 
+    Time shall be coverted to chrono::time_point for scheduling
+    */ 
     Job jb1, jb2, jb3;
     jb1.payload = p1;
     jb1.tp = std::chrono::system_clock::from_time_t(getFutureTime(10, 8)); // 10:08 (HH:MM)
@@ -80,6 +85,7 @@ int main() {
     jb2.tp = std::chrono::system_clock::from_time_t(getFutureTime(23, 9)); // 23:09 (HH:MM)
     jb2.funcPtr = handleRequest;
 
+    // Job pushed into a queue
     JobScheduler sched;
     sched.add(jb1);
     sched.add(jb2); 
@@ -88,7 +94,10 @@ int main() {
     jb3.payload = p3;
     jb3.tp = std::chrono::system_clock::from_time_t(getFutureTime(10, 8)); // 10:08 (HH:MM)
     jb3.funcPtr = handleRequest;
+
+    // Another Job pushed into a queue
     sched.add(jb3);
 
+    // The job function shall be triggered when the scheduled time is reached
     while (1) {}
 }
