@@ -1,7 +1,7 @@
 # schedulercpp
 
 ## Project Overview
-A time based job scheduler library using modern C++. The job can be scheduled by specifing the time (HH:MM) format, custom job function and payload (if any). When the specified time is reached, the schedule activates, causing any associated jobs to execute the job function. For more information, refer to the [example](example) code. 
+A time based job scheduler library using modern C++. The job can be scheduled by specifing the time (HH:MM) format, custom job function and arguments (if any). When the specified time is reached, the schedule activates, causing any associated jobs to execute the job function. For more information, refer to the [example](example) code. 
 
 ## License
 schedulercpp is licensed under the MIT license; see [LICENSE](LICENSE) in the source distribution for details.
