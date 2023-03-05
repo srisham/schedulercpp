@@ -17,33 +17,37 @@ JobScheduler::JobScheduler() :
 JobScheduler::~JobScheduler() {
 
     m_shutdown = true;
+    
     {
         std::lock_guard<std::mutex> lck{m_timerMtx};
         m_timerCV.notify_all();
     }
-    m_timerTd.join();
+    if (m_timerTd.joinable()) {
+        m_timerTd.join();
+    }
 
     {
         std::lock_guard<std::mutex> lck{m_jobMtx};
         m_jobCV.notify_all();
     }
-    m_jobTd.join();
-
+    if (m_jobTd.joinable()) {
+        m_jobTd.join();
+    }
 }
 
-void JobScheduler::add(Job k)
+void JobScheduler::add(Job jb)
 {
     std::lock_guard<std::mutex> lck{m_timerMtx};
 
     std::cout << "New Job pushed to Queue" << std::endl;
-    m_priorityQ.push({k});
+    m_priorityQ.push({jb});
     m_timerCV.notify_one();
 }
 
 void JobScheduler::executeJobThread()
 {
-    while (!m_shutdown)
-    {
+    while (!m_shutdown) {
+        
         std::unique_lock<std::mutex> lck{m_jobMtx};
 
         m_jobCV.wait(lck, [this] { return m_readyToRunList.size() != 0 ||
@@ -57,7 +61,7 @@ void JobScheduler::executeJobThread()
         m_readyToRunList.pop_back();
 
         lck.unlock();
-        std::cout << "Job executed @ "; printCurrentTime();
+        std::cout << "Job executed " << std::endl;
         Job.funcPtr(Job.payload);
     }
 }

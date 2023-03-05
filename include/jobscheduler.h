@@ -2,17 +2,12 @@
 #include <iostream>
 #include <chrono>
 #include <queue>
-#include <unistd.h>
 #include <vector>
 #include <thread>
 #include <condition_variable>
 #include <mutex>
-#include <memory>
 #include <functional>
 #include <any>
-
-
-void printCurrentTime();
 
 typedef std::function<void(std::any)> Executer;
 using timepoint = std::chrono::time_point<std::chrono::system_clock>;
@@ -23,7 +18,6 @@ struct Job {
     Executer funcPtr;
 };
 
-
 class JobScheduler {
 
 public:
@@ -33,7 +27,6 @@ public:
     void add(Job k);
 
 private:
-
     struct TScomp {
         bool operator()(const Job &a, const Job &b) const
         {
