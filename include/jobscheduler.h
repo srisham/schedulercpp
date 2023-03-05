@@ -9,23 +9,18 @@
 #include <mutex>
 #include <memory>
 #include <functional>
+#include <any>
 
 
 void printCurrentTime();
 
-struct Payload {
-    std::string deviceType;
-    std::string name;
-    int sceneId;
-};
-
-typedef std::function<std::string(std::shared_ptr<Payload>)> ExecuteJob;
+typedef std::function<void(std::any)> Executer;
 using timepoint = std::chrono::time_point<std::chrono::system_clock>;
 
 struct Job {
     timepoint tp;
-    std::shared_ptr<Payload> st;
-    ExecuteJob funcPtr;
+    std::any payload;
+    Executer funcPtr;
 };
 
 
